@@ -120,7 +120,7 @@ def movie_introduction_spider(movie_data):
     html_page = response.content
 
     # 防止IP封锁，适当减少频率
-    time.sleep(2)
+    time.sleep(3)
 
     movie_data_dict = movie_introduction_parser(html_page, {'title': title, 'cover': cover, 'id': movie_id})
 

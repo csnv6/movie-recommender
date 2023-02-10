@@ -54,4 +54,4 @@ def movie_spider_main():
             break
 
         # 防止爬虫访问过度导致IP封锁
-        time.sleep(8)
+        time.sleep(10)

@@ -147,7 +147,7 @@ def user_movie_parser(user_id, movie_type):
             if not check_movie_exists(movie_id):
                 continue
 
-            if movie_type is 'collect':
+            if movie_type == 'collect':
                 rate = tree.xpath('//*[@id="{}"]//*[starts-with(@class, "rating")]/@class'.format(movie_list_id))
                 if rate:
                     score = rate[0][6]
