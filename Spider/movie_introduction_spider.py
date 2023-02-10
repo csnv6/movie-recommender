@@ -5,7 +5,6 @@ import requests
 from lxml import etree
 
 from config import *
-from util import call_eip_worker_api
 
 
 def movie_introduction_saver(movie_data_list):
@@ -117,12 +116,6 @@ def movie_introduction_spider(movie_data):
 
     response = requests.request("GET", url, headers=headers, cookies=cookies)
 
-    # if response.status_code != 200:
-    #     # call_eip_worker_api()
-    #     time.sleep(180)
-    #     logging.info('更换eip')
-    #
-    #     return movie_introduction_spider(movie_data)
 
     html_page = response.content
 

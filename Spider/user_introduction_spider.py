@@ -6,7 +6,6 @@ from lxml import etree
 from urllib import parse
 
 from config import *
-from util import call_eip_worker_api
 
 # 每页的电影数目为30
 distance = 30
@@ -27,15 +26,6 @@ def gen_movie_link(user_id, type, index=0):
 
     response = requests.request("GET", url, headers=headers, cookies=cookies, params=querystring)
 
-    # 爬虫中断异常(访问被禁止)
-    # if response.status_code is not 200:
-    #     # 自动更换ip，继续爬取
-    #     call_eip_worker_api()
-    #     time.sleep(180)
-    #
-    #     logging.warning('更换eip')
-    #
-    #     return gen_movie_link(user_id, type, index)
     return response
 
 
@@ -62,13 +52,6 @@ def user_introduction_parser(user_url):
     response = requests.request("GET", user_url, headers=headers, cookies=cookies)
 
     # 爬虫中断异常(访问被禁止)
-    if response.status_code is not 200:
-        # 自动更换ip，继续爬取
-        call_eip_worker_api()
-        time.sleep(180)
-
-        logging.warning('更换eip')
-        return user_introduction_spider(user_url)
 
     html = response.content
     tree = etree.HTML(html)

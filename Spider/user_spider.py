@@ -5,7 +5,6 @@ from lxml import etree
 from urllib import parse
 
 from config import *
-from util import call_eip_worker_api
 from user_introduction_spider import user_introduction_spider
 
 """
@@ -37,13 +36,6 @@ def user_spider(movie_id):
 
     url = parse.urljoin(root_url, movie_id)
     response = requests.request("GET", url, headers=headers, cookies=cookies)
-
-    # if response.status_code is not 200:
-    #     call_eip_worker_api()
-    #     time.sleep(180)
-    #     logging.info('更换eip')
-    #
-    #     return user_spider(movie_id)
 
     print(response.status_code)
     html = response.content

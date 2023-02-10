@@ -7,21 +7,6 @@ from urllib import parse
 """一些常用的模块放在这里"""
 
 
-def call_eip_worker_api():
-    """
-    由于调用更换ip脚本后会出现断网的情况而无法正常跑通程序，更换ip服务被放到另一台机子以后台服务形式提供
-    :return:
-    """
-    thread = threading.Thread(target=lambda: os.system('curl http://116.85.37.93:5000/'))
-    thread.start()
-
-    time.sleep(5)
-    # 由于更换ip而无法得到返回值，导致curl命令一直在等待，我们这里直接kill掉相关进程
-    os.system("ps -ef | grep 'curl http://116.85.37.93:5000/' | grep -v grep | awk '{print $2}' | xargs kill -9")
-
-    thread.join(timeout=5)
-
-
 def deduplicate():
     """
     文本去重
