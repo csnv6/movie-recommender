@@ -31,6 +31,19 @@ def load_data(data_path):
         ratings = pd.read_csv(data_path, dtype=dtype, usecols=range(3))
         # 透视表，将电影ID转换为列名称，转换成为一个User-Movie的评分矩阵
         ratings_matrix = ratings.pivot_table(index=["userId"], columns=["movieId"], values="rating")
+        # movieId       1       2       3       4       ...  193583  193585  193587  193609
+        # userId                                        ...
+        # 1           4.0     NaN     4.0     NaN       ...     NaN     NaN     NaN     NaN
+        # 2           NaN     NaN     NaN     NaN       ...     NaN     NaN     NaN     NaN
+        # 3           NaN     NaN     NaN     NaN       ...     NaN     NaN     NaN     NaN
+        # 4           NaN     NaN     NaN     NaN       ...     NaN     NaN     NaN     NaN
+        # 5           4.0     NaN     NaN     NaN       ...     NaN     NaN     NaN     NaN
+        # ...         ...     ...     ...     ...       ...     ...     ...     ...     ...
+        # 606         2.5     NaN     NaN     NaN       ...     NaN     NaN     NaN     NaN
+        # 607         4.0     NaN     NaN     NaN       ...     NaN     NaN     NaN     NaN
+        # 608         2.5     2.0     2.0     NaN       ...     NaN     NaN     NaN     NaN
+        # 609         3.0     NaN     NaN     NaN       ...     NaN     NaN     NaN     NaN
+        # 610         5.0     NaN     NaN     NaN       ...     NaN     NaN     NaN     NaN
         # 存入缓存文件
         ratings_matrix.to_pickle(cache_path)
         print("数据集加载完毕")
@@ -203,8 +216,8 @@ def top_k_rs_result(k):
 if __name__ == '__main__':
 
     # 数据加载
-    # ratings_matrix = load_data(DATA_PATH)
-    # print(ratings_matrix)
+    ratings_matrix = load_data(DATA_PATH)
+    print(ratings_matrix)
 
     # # 相似度计算
     # user_similar = compute_pearson_similarity(ratings_matrix, based="user")
@@ -231,9 +244,9 @@ if __name__ == '__main__':
     #
     #
     # # 根据预测评分为指定用户进行TOP-N推荐
-    from pprint import pprint
-    result = top_k_rs_result(20)
-    pprint(result)
+    # from pprint import pprint
+    # result = top_k_rs_result(20)
+    # pprint(result)
 
 
 

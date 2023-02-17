@@ -15,6 +15,7 @@ user_handler = logging.FileHandler(filename='log/user_spider.log')
 user_handler.setFormatter(formatter)
 user_handler.setLevel(logging.INFO)
 
+# Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36
 
 my_headers = [
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36",

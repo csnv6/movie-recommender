@@ -7,38 +7,42 @@ object ubTest {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder().master("local").appName("movie").getOrCreate()
 
-//    val data = spark.sparkContext.textFile("C:\\other-code\\movie-recommender-system\\movie-recommender-system\\data\\ratings.csv")
+    spark.sparkContext.setLogLevel("ERROR")
 
     val data = spark.read
       .option("header", "true") //将第一行当作表头
       .option("inferSchema", "true") //推断数据类型
-      .csv("C:\\other-code\\movie-recommender-system\\movie-recommender-system\\data\\ratings.csv")
+      .csv("..\\data\\ratings.csv")
 
-    data.registerTempTable("udata")
+    data.createOrReplaceTempView("udata")
 
     val userItemDf = spark.sql("select * from udata limit 100")
 
-    userItemDf.show()
+//    userItemDf.show()
 
-
-    val userItemDf2 = spark.sql("select user_id as user_id2,item_id as item_id2,rating as rating2 from udata")
-    val joinDf = userItemDf.join(userItemDf2, userItemDf("item_id") === userItemDf2("item_id2")).filter("user_id <  user_id2")
+    val userItemDf2 = spark.sql("select user_id as user_id2,movie_id as movie_id2,rating as rating2 from udata")
+    val joinDf = userItemDf.join(userItemDf2, userItemDf("movie_id") === userItemDf2("movie_id2")).filter("user_id <  user_id2")
     //      .groupBy("user_id", "user_id2")
+
+    joinDf.show()
     /*
-    +-------+-------+------+---------+--------+--------+-------+
-    |user_id|item_id|rating|timestamp|user_id2|item_id2|rating2|
-    +-------+-------+------+---------+--------+--------+-------+
-    |    196|    242|     3|881250949|     721|     242|      3|
-    |    196|    242|     3|881250949|     720|     242|      4|
-    |    196|    242|     3|881250949|     500|     242|      3|
-    |    196|    242|     3|881250949|     845|     242|      4|
+      +------+-------+------+---------+-------+--------+-------+
+      |userId|movieId|rating|timestamp|userId2|movieId2|rating2|
+      +------+-------+------+---------+-------+--------+-------+
+      |     1|    333|   5.0|964981179|      2|     333|    4.0|
+      |     1|    527|   5.0|964984002|      3|     527|    0.5|
+      |     1|   1275|   5.0|964982290|      3|    1275|    3.5|
+      |     1|     47|   5.0|964983815|      4|      47|    2.0|
     */
 
     import spark.implicits._
     //user_id，score_id
-    val userScoreSum = userItemDf.rdd.map(x => (x(0).toString, x(2).toString)).groupByKey()
+    val userScoreSum = userItemDf.rdd.map(x => (x(0).toString, x(2).toString))
+      .groupByKey()
       .mapValues(x => sqrt(x.toArray.map(line => pow(line.toDouble, 2)).sum))
     val df_user_sum = userScoreSum.toDF("user_id_sum", "rating_sqrt_sum")
+
+    df_user_sum.show()
     /*
     +-----------+------------------+
     |user_id_sum|   rating_sqrt_sum|
@@ -84,6 +88,7 @@ object ubTest {
     val df_res = df_sim.withColumn("sim",sim_udf(col("rating_sum_pro"),col("rating_sqrt_user_id_sum"),col("rating_sqrt_user_id2_sum"))).select("user_id","user_id2","sim")
     //    df_res.show()
 
+    spark.close()
 
   }
 

@@ -116,7 +116,6 @@ def movie_introduction_spider(movie_data):
 
     response = requests.request("GET", url, headers=headers, cookies=cookies)
 
-
     html_page = response.content
 
     # 防止IP封锁，适当减少频率

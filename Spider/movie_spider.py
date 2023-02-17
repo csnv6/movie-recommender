@@ -1,4 +1,5 @@
 import json
+import sys
 import time
 import requests
 import threading
@@ -24,11 +25,15 @@ def movide_spider(index):
     querystring["start"] = str(index * 20)
     response = requests.request("GET", url, headers=headers, params=querystring, cookies=cookies)#,proxies={'https':'111.225.153.240:8089'})
 
-    if 'data' in json.loads(response.text):
-        response_json = json.loads(response.text)['data']
-    else:
-        response_json = None
-    return response_json
+    try:
+        if 'data' in json.loads(response.text):
+            response_json = json.loads(response.text)['data']
+        else:
+            response_json = None
+        return response_json
+    except:
+        print(response.text)
+        sys.exit(1)
 
 
 def movie_spider_main():
@@ -54,4 +59,4 @@ def movie_spider_main():
             break
 
         # 防止爬虫访问过度导致IP封锁
-        time.sleep(10)
+        time.sleep(5)
