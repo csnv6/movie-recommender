@@ -24,7 +24,6 @@ object ubTest {
 
     val userItemDf2 = spark.sql("select user_id as user_id2,movie_id as movie_id2,rating as rating2 from udata")
     val joinDf = userItemDf.join(userItemDf2, userItemDf("movie_id") === userItemDf2("movie_id2")).filter("user_id < user_id2")
-    //      .groupBy("user_id", "user_id2")
 /* select a.user_id,a.movie_id,a.rating,b.user_id as user_id2,b.rating as rating2 from ratings a join ratings b where a.movie_id = b.movie_id and a.user_id <> b.user_id */
     joinDf.show()
     /*
@@ -149,7 +148,20 @@ object ubTest {
 
     df_res.createOrReplaceTempView("res")
 
-    spark.sql(
+    // 获取相近的10个用户
+//    spark.sql(
+//      """
+//        | select
+//        |   user_id
+//        | from res
+//        | where user_id = 130
+//        | order by sim
+//        | limit 10
+//        |""".stripMargin).show()
+
+
+// 获取邻近的10个用户与其不重复的电影
+    val movieDf = spark.sql(
       """
         |  select movie_id,rating from udata
         |  where user_id in (
@@ -158,10 +170,75 @@ object ubTest {
         |      from res
         |      where user_id = 130
         |      order by sim desc
-        |      limit 1
+        |      limit 10
         |  ) and movie_id not in (select movie_id from udata where user_id = 130)
         |  order by rating desc limit 5
-        |""".stripMargin).show()
+        |""".stripMargin)
+
+    movieDf.show()
+
+    // 用户的相似度*评分  来进行推荐10部电影
+    spark.sql(
+      """
+        |SELECT  a.movie_id
+        |       ,sum(rating*sim)
+        |FROM
+        |(
+        |	SELECT  a.movie_id
+        |	       ,rating
+        |	       ,sim
+        |	FROM test.test_ratings a
+        |	JOIN
+        |	(
+        |		SELECT  user_id2
+        |		       ,sim
+        |		FROM test.test_res
+        |		WHERE user_id = 130
+        |		ORDER BY sim desc
+        |		LIMIT 10
+        |	) b
+        |	ON a.user_id = b.user_id2
+        |)a
+        |LEFT JOIN
+        |(
+        |	SELECT  movie_id
+        |	FROM test.test_ratings
+        |	WHERE user_id = 130
+        |)b
+        |ON a.movie_id = b.movie_id
+        |WHERE b.movie_id is null
+        |group by a.movie_id
+        |""".stripMargin)
+
+    /*
+SELECT  a.movie_id
+       ,rating*sim
+FROM
+(
+	SELECT  a.movie_id
+	       ,rating
+	       ,sim
+	FROM test.test_ratings a
+	JOIN
+	(
+		SELECT  user_id2
+		       ,sim
+		FROM test.test_res
+		WHERE user_id = 130
+		ORDER BY sim desc
+		LIMIT 10
+	) b
+	ON a.user_id = b.user_id2
+)a
+LEFT JOIN
+(
+	SELECT  movie_id
+	FROM test.test_ratings
+	WHERE user_id = 130
+)b
+ON a.movie_id = b.movie_id
+WHERE b.movie_id is null
+*/
 
     spark.close()
 
