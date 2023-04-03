@@ -16,6 +16,9 @@ object ubTest {
       .option("inferSchema", "true") //推断数据类型
       .csv("..\\data\\ratings.csv")
 
+    data.printSchema()
+    data.dtypes
+    data.describe()
     data.createOrReplaceTempView("udata")
 
     val userItemDf = spark.sql("select * from udata")
