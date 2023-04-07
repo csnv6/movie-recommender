@@ -1,5 +1,5 @@
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.{broadcast, col, desc, udf}
+import org.apache.spark.sql.functions.{broadcast, col, desc, expr, udf}
 
 /**
  * @author CSN
@@ -75,12 +75,13 @@ object UserBased {
     movieData.describe().show()
 
     movieData.createOrReplaceTempView("movie")
-    // 限制相似度大于0.6
+    // 限制相似度大于0.6，并保留4位小数即可
     val userFilter = simDf.where("user_id = 130")
       .where("sim >= 0.6")
       .orderBy(desc("sim"))
       .limit(10)
-      .select("user_id2","sim")
+//      .select("user_id2","sim")
+      .select('user_id2,expr("round(sim,4)") as "sim")
 
     val a = data.join(broadcast(userFilter),userFilter("user_id2") === data("user_id"))
       .select("movie_id","rating","sim")
@@ -124,9 +125,10 @@ object UserBased {
         |group by a.movie_id
         |having count(*) > 1
         |""".stripMargin)
-    movieTop2.orderBy(desc("rating")).limit(10).show()
+    val movieTopN = movieTop2.orderBy(desc("rating")).limit(10).select('movie_id,expr("round(rating,2)") as "rating")
+    movieTopN.show()
 
-    movieTop2.join(movieData,movieData("movie_id") === movieTop("movie_id")).select("title").show(false)
+    movieTopN.join(movieData,movieData("movie_id") === movieTop("movie_id")).select("title").show(false)
 
   }
 
