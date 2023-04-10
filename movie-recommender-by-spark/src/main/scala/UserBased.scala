@@ -128,7 +128,7 @@ object UserBased {
     val movieTopN = movieTop2.orderBy(desc("rating")).limit(10).select('movie_id,expr("round(rating,2)") as "rating")
     movieTopN.show()
 
-    movieTopN.join(movieData,movieData("movie_id") === movieTop("movie_id")).select("title").show(false)
+    movieTopN.join(movieData,movieData("movie_id") === movieTopN("movie_id")).select("title").show(false)
 
   }
 
